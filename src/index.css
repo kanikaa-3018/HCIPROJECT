@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Light mode (default) */
+  html, body {
+    @apply bg-light-50 text-dark-900 antialiased;
+    color-scheme: light;
+  }
+
+  /* Dark mode */
+  html.dark, html.dark body {
+    @apply bg-dark-800 text-dark-100 antialiased;
+    color-scheme: dark;
+  }
+
+  :root {
+    --transition-duration: 300ms;
+  }
+}
+
+* {
+  @apply transition-colors transition-[background-color,border-color,box-shadow] duration-300;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  @apply w-2 h-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-light-300 dark:bg-dark-700;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary-500 dark:bg-primary-600 rounded hover:bg-primary-400 dark:hover:bg-primary-500;
+}
+
+/* Toast notifications */
+@layer components {
+  .toast-container {
+    @apply fixed top-4 right-4 z-50 space-y-2;
+  }
+
+  .toast {
+    @apply px-5 py-3 rounded-xl shadow-dark dark:shadow-dark animate-slideUp backdrop-blur-sm border border-opacity-20;
+  }
+
+  .toast-success {
+    @apply bg-primary-900/80 dark:bg-primary-900/80 text-primary-200 dark:text-primary-200 border-primary-700 dark:border-primary-700;
+  }
+
+  .toast-error {
+    @apply bg-accent-900/80 dark:bg-accent-900/80 text-accent-200 dark:text-accent-200 border-accent-700 dark:border-accent-700;
+  }
+
+  .toast-info {
+    @apply bg-primary-800/80 dark:bg-primary-800/80 text-primary-100 dark:text-primary-100 border-primary-600 dark:border-primary-600;
+  }
+}
