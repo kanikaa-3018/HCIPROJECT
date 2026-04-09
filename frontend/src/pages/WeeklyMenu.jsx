@@ -39,6 +39,21 @@ function WeeklyMenu() {
   const dayIndex = today.getDay()
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
+  // Create a map of menu items by day
+  const menuByDay = {}
+  menu.forEach((day) => {
+    menuByDay[day.day] = day
+  })
+
+  // Ensure all days of the week are displayed
+  const allDays = daysOfWeek.map((dayName) => menuByDay[dayName] || {
+    day: dayName,
+    breakfast: 'Not available',
+    lunch: 'Not available',
+    hiTea: 'Not available',
+    dinner: 'Not available',
+  })
+
   return (
     <div className="space-y-8">
       {/* Header with Gradient */}
@@ -52,9 +67,9 @@ function WeeklyMenu() {
         </div>
       </div>
 
-      {/* Weekly Menu Grid */}
+      {/* Weekly Menu Grid - All 7 Days */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-slideUp">
-        {menu.map((day, index) => {
+        {allDays.map((day, index) => {
           const isToday = daysOfWeek[dayIndex] === day.day
           
           return (

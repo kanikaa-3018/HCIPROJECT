@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
-import Login from './pages/Login'
+import Auth from './pages/Auth'
 import StudentDashboard from './pages/StudentDashboard'
 import DailyMenu from './pages/DailyMenu'
 import WeeklyMenu from './pages/WeeklyMenu'
+import RatingsPage from './pages/RatingsPage'
 import FeedbackPage from './pages/FeedbackPage'
 import AdminDashboard from './pages/AdminDashboard'
 import ReportsPage from './pages/ReportsPage'
@@ -19,8 +20,12 @@ function App() {
       <Router>
         <Routes>
           <Route 
+            path="/auth" 
+            element={!user ? <Auth /> : <Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} />} 
+          />
+          <Route 
             path="/login" 
-            element={!user ? <Login /> : <Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} />} 
+            element={!user ? <Auth /> : <Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} />} 
           />
           
           {/* Student Routes */}
@@ -45,6 +50,14 @@ function App() {
             element={
               <ProtectedRoute roles={['btech', 'mtech']} layout={MainLayout}>
                 <WeeklyMenu />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/ratings" 
+            element={
+              <ProtectedRoute roles={['btech', 'mtech']} layout={MainLayout}>
+                <RatingsPage />
               </ProtectedRoute>
             } 
           />
@@ -75,7 +88,7 @@ function App() {
             } 
           />
           
-          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/" element={<Navigate to={user ? (user.role === 'admin' ? '/admin' : '/dashboard') : '/auth'} />} />
         </Routes>
       </Router>
       <Toast />

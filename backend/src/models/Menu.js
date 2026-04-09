@@ -13,7 +13,7 @@ const mealSchema = new mongoose.Schema({
   description: String,
   timeSlot: {
     type: String,
-    enum: ['breakfast', 'lunch', 'dinner'],
+    enum: ['breakfast', 'lunch', 'hiTea', 'dinner'],
     required: true
   }
 })

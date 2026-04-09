@@ -6,36 +6,50 @@ import { authAPI } from '../services/api'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import Card from '../components/Card'
-import { UtensilsCrossed, Lock, Mail } from 'lucide-react'
+import { UtensilsCrossed, Lock, Mail, User, FileText, Users } from 'lucide-react'
 
-function Login({ onSwitchToSignup }) {
-  const [email, setEmail] = useState('student@college.edu')
-  const [password, setPassword] = useState('password')
+function Signup({ onSwitchToLogin }) {
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [rollNumber, setRollNumber] = useState('')
+  const [role, setRole] = useState('btech')
   const [loading, setLoading] = useState(false)
   const { setUser } = useAuthStore()
   const { addToast } = useToastStore()
   const navigate = useNavigate()
 
-  const handleLogin = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault()
     
-    if (!email || !password) {
+    if (!name || !email || !password || !rollNumber) {
       addToast('Please fill in all fields', 'error')
+      return
+    }
+
+    if (password.length < 6) {
+      addToast('Password must be at least 6 characters', 'error')
       return
     }
 
     setLoading(true)
     try {
-      const response = await authAPI.login(email, password)
+      const response = await authAPI.register(name, email, password, rollNumber, role)
       setUser(response.user)
-      addToast('Login successful!', 'success')
+      addToast('Signup successful!', 'success')
       navigate(response.user.role === 'admin' ? '/admin' : '/dashboard')
     } catch (error) {
-      addToast('Login failed. Please try again.', 'error')
+      addToast(error.message || 'Signup failed. Please try again.', 'error')
     } finally {
       setLoading(false)
     }
   }
+
+  const roles = [
+    { value: 'btech', label: 'B.Tech Student' },
+    { value: 'mtech', label: 'M.Tech/PhD Student' },
+    { value: 'admin', label: 'Admin (Warden)' },
+  ]
 
   return (
     <div className="min-h-screen bg-light-50 dark:bg-dark-800 flex items-center justify-center p-4 relative overflow-hidden transition-colors duration-300">
@@ -62,13 +76,26 @@ function Login({ onSwitchToSignup }) {
             </div>
           </div>
           <p className="text-dark-700 dark:text-dark-300 font-medium">
-            Sign In to Your Account
+            Create Your Account
           </p>
         </div>
 
-        {/* Login Card */}
+        {/* Signup Card */}
         <Card className="p-8 animate-scaleIn">
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleSignup} className="space-y-6">
+            {/* Name */}
+            <div>
+              <Input
+                label="Full Name"
+                type="text"
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={loading}
+                icon={User}
+              />
+            </div>
+
             {/* Email */}
             <div>
               <Input
@@ -79,6 +106,19 @@ function Login({ onSwitchToSignup }) {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
                 icon={Mail}
+              />
+            </div>
+
+            {/* Roll Number */}
+            <div>
+              <Input
+                label="Roll Number"
+                type="text"
+                placeholder="BT2024001"
+                value={rollNumber}
+                onChange={(e) => setRollNumber(e.target.value)}
+                disabled={loading}
+                icon={FileText}
               />
             </div>
 
@@ -95,15 +135,35 @@ function Login({ onSwitchToSignup }) {
               />
             </div>
 
-            {/* Demo Credentials Info */}
-            <div className="p-4 border-l-4 border-primary-500 dark:border-primary-500 bg-primary-50 dark:bg-primary-900/30 rounded-lg backdrop-blur-sm">
-              <p className="font-bold mb-2 text-primary-700 dark:text-primary-300">
-                Demo Credentials
-              </p>
-              <div className="text-sm space-y-1 text-primary-800 dark:text-primary-400">
-                <p><span className="font-semibold">Student:</span> student@college.edu</p>
-                <p><span className="font-semibold">Admin:</span> admin@college.edu</p>
-                <p><span className="font-semibold">Password:</span> password</p>
+            {/* Role Selection */}
+            <div>
+              <label className="block text-sm font-bold text-dark-900 dark:text-dark-100 mb-3 flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                Select Your Role
+              </label>
+              <div className="space-y-3">
+                {roles.map((r) => (
+                  <label 
+                    key={r.value} 
+                    className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+                      role === r.value
+                        ? 'border-primary-400 dark:border-primary-500 bg-primary-100 dark:bg-primary-600/20 shadow-glow-sm dark:shadow-glow-sm'
+                        : 'border-light-300 dark:border-dark-600 hover:border-primary-500 dark:hover:border-primary-600 hover:bg-light-200 dark:hover:bg-dark-600'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="role"
+                      value={r.value}
+                      checked={role === r.value}
+                      onChange={(e) => setRole(e.target.value)}
+                      className="w-5 h-5 text-primary-500 dark:text-primary-500 cursor-pointer accent-primary-500"
+                    />
+                    <span className="ml-3 font-semibold text-dark-900 dark:text-dark-100">
+                      {r.label}
+                    </span>
+                  </label>
+                ))}
               </div>
             </div>
 
@@ -113,19 +173,19 @@ function Login({ onSwitchToSignup }) {
               disabled={loading}
               className="w-full"
             >
-              {loading ? 'Signing In...' : 'Sign In'}
+              {loading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
 
-          {/* Switch to Signup */}
+          {/* Switch to Login */}
           <div className="mt-6 pt-6 border-t border-light-300 dark:border-dark-600 text-center">
             <p className="text-dark-700 dark:text-dark-300 text-sm">
-              Don't have an account?{' '}
+              Already have an account?{' '}
               <button
-                onClick={onSwitchToSignup}
+                onClick={onSwitchToLogin}
                 className="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
               >
-                Create one
+                Sign In
               </button>
             </p>
           </div>
@@ -135,4 +195,4 @@ function Login({ onSwitchToSignup }) {
   )
 }
 
-export default Login
+export default Signup

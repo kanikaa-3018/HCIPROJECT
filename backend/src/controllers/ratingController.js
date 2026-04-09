@@ -82,3 +82,17 @@ export const getUserRating = async (req, res) => {
     res.status(500).json({ message: error.message })
   }
 }
+
+export const getUserRatings = async (req, res) => {
+  try {
+    const userId = req.user.userId
+
+    const userRatings = await Rating.find({ userId })
+      .sort({ date: -1 })
+      .limit(50)
+
+    res.json(userRatings)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}

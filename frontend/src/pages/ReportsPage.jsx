@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Calendar, Download, Share2, FileText, TrendingUp } from 'lucide-react'
+import { Calendar, Download, Share2, FileText, TrendingUp, Printer } from 'lucide-react'
 import Card from '../components/Card'
 import Button from '../components/Button'
 import StatCard from '../components/StatCard'
@@ -28,30 +28,157 @@ function ReportsPage() {
   }
 
   const handleDownload = () => {
-    const reportData = `
-Mess Menu & Feedback System - Weekly Report
-Generated on: ${report?.date}
+    const reportData = `MESS MENU & FEEDBACK SYSTEM - WEEKLY REPORT
+${'='.repeat(70)}
 
-SUMMARY
----------
-Average Rating: ${report?.avgRating?.toFixed(1)}/5.0
+Report Date: ${report?.date}
+Period: Last 7 days
+
+${'='.repeat(70)}
+KEY METRICS
+${'='.repeat(70)}
+Average Overall Rating: ${report?.avgRating?.toFixed(2)}/5.0
+Total Ratings: ${report?.totalRatings}
 Total Feedback: ${report?.totalFeedback}
-Top Meal: ${report?.topMeal}
+Top Rated Meal: ${report?.topMeal}
 
+${'='.repeat(70)}
+TOP 5 MEALS
+${'='.repeat(70)}
+${report?.topMeals?.map((m, i) => `${i + 1}. ${m.meal}: ${m.avg}/5 (${m.count} ratings)`).join('\n') || 'No data'}
+
+${'='.repeat(70)}
 ISSUE DISTRIBUTION
----------
-${report?.issues?.map(i => `${i.type}: ${i.count}`).join('\n')}
+${'='.repeat(70)}
+${report?.issues?.map(i => `• ${i.type}: ${i.count} reports`).join('\n') || 'No data'}
 
+${'='.repeat(70)}
+7-DAY RATING TREND
+${'='.repeat(70)}
+${report?.weeklyTrend?.map(w => `${w.day}: ${w.avg}/5 (${w.count} ratings)`).join('\n') || 'No data'}
+
+${'='.repeat(70)}
+RECENT FEEDBACK (Last 10)
+${'='.repeat(70)}
+${report?.recentFeedback?.map(f => `\n[${f.date}] ${f.user} - ${f.meal}\nIssue: ${f.type}${f.rating ? ` | Rating: ${f.rating}/5` : ''}\nComment: ${f.comment}`).join('\n---\n') || 'No feedback'}
+
+${'='.repeat(70)}
 Report Generated: ${new Date().toLocaleString()}
-    `
+`
     const element = document.createElement('a')
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(reportData))
-    element.setAttribute('download', `report-${report?.date}.txt`)
+    element.setAttribute('download', `Weekly_Report_${new Date().toISOString().split('T')[0]}.txt`)
     element.style.display = 'none'
     document.body.appendChild(element)
     element.click()
     document.body.removeChild(element)
-    addToast('Report downloaded!', 'success')
+    addToast('Report downloaded successfully!', 'success')
+  }
+
+  const handlePrint = () => {
+    if (!report) {
+      addToast('Generate a report first', 'warning')
+      return
+    }
+    
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Weekly Report - ${report.date}</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .header { background-color: #3ebab3; color: white; padding: 20px; text-align: center; margin-bottom: 20px; }
+          .section { margin: 20px 0; padding: 15px; border-left: 4px solid #3ebab3; }
+          .metric { display: inline-block; margin: 10px 20px; text-align: center; }
+          .metric-value { font-size: 24px; font-weight: bold; color: #3ebab3; }
+          .metric-label { font-size: 12px; color: #666; }
+          table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+          th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+          th { background-color: #f0f0f0; font-weight: bold; }
+          .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #999; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Weekly Report</h1>
+          <p>Generated on ${report.date}</p>
+        </div>
+        
+        <div class="section">
+          <h2>Key Metrics</h2>
+          <div class="metric">
+            <div class="metric-value">${report.avgRating?.toFixed(2)}/5</div>
+            <div class="metric-label">Average Rating</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${report.totalFeedback}</div>
+            <div class="metric-label">Total Feedback</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${report.totalRatings}</div>
+            <div class="metric-label">Total Ratings</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${report.topMeal}</div>
+            <div class="metric-label">Top Meal</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Issue Distribution</h2>
+          <table>
+            <tr><th>Issue Type</th><th>Count</th></tr>
+            ${report?.issues?.map(i => `<tr><td>${i.type}</td><td>${i.count}</td></tr>`).join('')}
+          </table>
+        </div>
+
+        <div class="section">
+          <h2>Top 5 Meals</h2>
+          <table>
+            <tr><th>Rank</th><th>Meal</th><th>Avg Rating</th><th>Ratings</th></tr>
+            ${report?.topMeals?.map((m, i) => `<tr><td>${i + 1}</td><td>${m.meal}</td><td>${m.avg}/5</td><td>${m.count}</td></tr>`).join('')}
+          </table>
+        </div>
+
+        <div class="footer">
+          <p>Mess Menu & Feedback System | ${new Date().toLocaleString()}</p>
+        </div>
+      </body>
+      </html>
+    `
+    const printWindow = window.open('', '', 'width=800,height=600')
+    printWindow.document.write(printContent)
+    printWindow.document.close()
+    setTimeout(() => {
+      printWindow.print()
+      addToast('Opening print dialog...', 'success')
+    }, 250)
+  }
+
+  const handleShare = () => {
+    if (!report) {
+      addToast('Generate a report first', 'warning')
+      return
+    }
+    
+    const shareText = `Check out this week's Mess Report! Average Rating: ${report.avgRating?.toFixed(2)}/5, Top Meal: ${report.topMeal}, Total Feedback: ${report.totalFeedback} entries`
+    
+    if (navigator.share) {
+      navigator.share({
+        title: 'Weekly Mess Report',
+        text: shareText,
+        url: window.location.href
+      }).catch(err => console.log('Share cancelled'))
+    } else {
+      // Fallback: Copy to clipboard
+      const textToCopy = `Weekly Report - ${report.date}\n${shareText}`
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        addToast('Report summary copied to clipboard!', 'success')
+      }).catch(() => {
+        addToast('Share not supported on this device', 'warning')
+      })
+    }
   }
 
   return (
@@ -186,19 +313,36 @@ Report Generated: ${new Date().toLocaleString()}
           </Card>
 
           {/* Download Actions */}
-          <Card className="p-6 animate-slideUp">
-            <h3 className="text-lg font-bold text-dark-900 dark:text-dark-50 mb-4">Export Report</h3>
-            <div className="flex flex-wrap gap-3">
-              <Button onClick={handleDownload}>
+          <Card className="p-6 bg-gradient-to-br from-primary-700/20 via-teal-600/15 to-primary-600/20 border-primary-600 shadow-lg shadow-primary-500/10 animate-slideUp">
+            <h3 className="text-lg font-bold text-dark-900 dark:text-dark-50 mb-5 flex items-center gap-2">
+              <Download className="w-5 h-5 text-primary-500" /> Export Report
+            </h3>
+            <div className="flex flex-wrap gap-4">
+              <Button
+                onClick={handleDownload}
+                variant="primary"
+                size="md"
+                className="bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 shadow-lg hover:shadow-xl hover:shadow-blue-500/30"
+              >
                 <Download className="w-5 h-5" />
                 Download as Text
               </Button>
-              <Button>
+              <Button
+                onClick={handleShare}
+                variant="primary"
+                size="md"
+                className="bg-gradient-to-r from-purple-500 to-purple-400 hover:from-purple-600 hover:to-purple-500 shadow-lg hover:shadow-xl hover:shadow-purple-500/30"
+              >
                 <Share2 className="w-5 h-5" />
                 Share Report
               </Button>
-              <Button>
-                <FileText className="w-5 h-5" />
+              <Button
+                onClick={handlePrint}
+                variant="primary"
+                size="md"
+                className="bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500 shadow-lg hover:shadow-xl hover:shadow-orange-500/30"
+              >
+                <Printer className="w-5 h-5" />
                 Print
               </Button>
             </div>
@@ -206,17 +350,26 @@ Report Generated: ${new Date().toLocaleString()}
 
           {/* Historical Reports */}
           <Card className="p-6 animate-slideUp">
-            <h3 className="text-lg font-bold text-dark-50 mb-4">Recent Reports</h3>
+            <h3 className="text-lg font-bold text-dark-900 dark:text-dark-50 mb-5 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-primary-500" /> Recent Reports
+            </h3>
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-between p-4 rounded-lg border-2 bg-gradient-to-r from-dark-600 to-primary-600/10 border-dark-600 hover:border-primary-700 transition-all">
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-4 rounded-xl border-2 bg-gradient-to-r from-primary-600/10 to-teal-500/10 dark:from-primary-700/20 dark:to-teal-600/20 border-primary-400/30 dark:border-primary-600/50 hover:border-primary-500 dark:hover:border-primary-500 hover:shadow-soft dark:hover:shadow-glow-sm transition-all"
+                >
                   <div>
-                    <p className="font-semibold text-dark-50">Week {i}</p>
-                    <p className="text-xs text-dark-400">
+                    <p className="font-semibold text-dark-900 dark:text-dark-50">Week {i}</p>
+                    <p className="text-sm text-dark-500 dark:text-dark-400">
                       {new Date(Date.now() - i * 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}
                     </p>
                   </div>
-                  <Button size="sm" className="gap-2">
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    className="bg-gradient-to-r from-teal-500 to-teal-400 hover:from-teal-600 hover:to-teal-500 shadow-md hover:shadow-lg hover:shadow-teal-500/30 gap-2"
+                  >
                     <Download className="w-4 h-4" />
                   </Button>
                 </div>

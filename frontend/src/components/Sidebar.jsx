@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { useToastStore } from '../store/toastStore'
 import { useThemeStore } from '../store/themeStore'
-import { Menu, X, LogOut, UtensilsCrossed, BarChart3, FileText, Home, Calendar, Moon, Sun } from 'lucide-react'
+import { Menu, X, LogOut, UtensilsCrossed, BarChart3, FileText, Home, Calendar, Moon, Sun, Star } from 'lucide-react'
 import clsx from 'clsx'
 
 function Sidebar() {
@@ -25,13 +25,14 @@ function Sidebar() {
         { label: 'Dashboard', icon: Home, path: '/dashboard' },
         { label: 'Daily Menu', icon: UtensilsCrossed, path: '/menu/daily' },
         { label: 'Weekly Menu', icon: Calendar, path: '/menu/weekly' },
+        { label: 'Ratings', icon: Star, path: '/ratings' },
         { label: 'Feedback', icon: FileText, path: '/feedback' },
       ]
 
   const handleLogout = async () => {
     logout()
     addToast('Logged out successfully', 'success')
-    navigate('/login')
+    navigate('/auth')
   }
 
   const isActive = (path) => location.pathname === path

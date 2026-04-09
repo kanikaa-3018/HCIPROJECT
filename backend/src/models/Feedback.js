@@ -4,7 +4,7 @@ const feedbackSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   },
   mealName: {
     type: String,
@@ -14,6 +14,12 @@ const feedbackSchema = new mongoose.Schema({
     type: String,
     enum: ['taste', 'hygiene', 'quantity', 'other'],
     required: true
+  },
+  rating: {
+    type: Number,
+    min: 1,
+    max: 5,
+    required: false
   },
   comment: {
     type: String,

@@ -23,7 +23,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
-      window.location.href = '/login'
+      localStorage.removeItem('user')
+      window.location.href = '/auth'
     }
     return Promise.reject(error)
   }
@@ -113,6 +114,15 @@ export const ratingAPI = {
     }
   },
 
+  getUserRatings: async () => {
+    try {
+      const response = await api.get('/rating/my-ratings')
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error
+    }
+  },
+
   getUserRating: async (mealId) => {
     try {
       const response = await api.get(`/rating/user/${mealId}`)
@@ -125,13 +135,14 @@ export const ratingAPI = {
 
 // ==================== FEEDBACK API ====================
 export const feedbackAPI = {
-  submitFeedback: async (mealName, issueType, comment, isAnonymous) => {
+  submitFeedback: async (mealName, issueType, comment, isAnonymous, rating) => {
     try {
       const response = await api.post('/feedback/submit', {
         mealName,
         issueType,
         comment,
-        isAnonymous
+        isAnonymous,
+        rating
       })
       return response.data
     } catch (error) {
@@ -148,9 +159,45 @@ export const feedbackAPI = {
     }
   },
 
+  getFeedback: async () => {
+    try {
+      const response = await api.get('/feedback/all')
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error
+    }
+  },
+
+  getTopFeedback: async (page = 1, limit = 6) => {
+    try {
+      const response = await api.get(`/feedback/top?page=${page}&limit=${limit}`)
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error
+    }
+  },
+
+  getUserFeedback: async () => {
+    try {
+      const response = await api.get('/feedback/user')
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error
+    }
+  },
+
   getFeedbackByMeal: async (mealName) => {
     try {
       const response = await api.get(`/feedback/meal/${mealName}`)
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error
+    }
+  },
+
+  getSummary: async () => {
+    try {
+      const response = await api.get('/feedback/summary')
       return response.data
     } catch (error) {
       throw error.response?.data || error
