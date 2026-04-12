@@ -38,13 +38,6 @@ function FeedbackPage() {
     fetchCommunityFeedback(currentPage)
   }, [currentPage])
 
-  // Debug meal availability
-  useEffect(() => {
-    console.log('📋 Menu updated:', menu)
-    console.log('🍽️ All meals available:', allMeals)
-    console.log('📝 Meal options for dropdown:', mealOptions)
-  }, [menu, allMeals, mealOptions])
-
   const fetchData = async () => {
     try {
       setLoading(true)
@@ -224,9 +217,11 @@ function FeedbackPage() {
       : communityFeedback.filter((f) => f.status !== 'resolved')
 
   const stats = {
-    total: paginationData?.totalFeedback || 0,
-    userFeedback: userFeedback.length,
-    pending: communityFeedback.filter((f) => f.status === 'pending').length,
+    total: paginationData?.totalFeedback || communityFeedback.length || 0,
+    userFeedback: Array.isArray(userFeedback) ? userFeedback.length : 0,
+    pending: Array.isArray(communityFeedback) 
+      ? communityFeedback.filter((f) => f?.status === 'pending').length 
+      : 0,
   }
 
   if (loading && communityFeedback.length === 0 && userFeedback.length === 0) {
