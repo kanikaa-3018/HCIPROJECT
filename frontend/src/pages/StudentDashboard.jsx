@@ -66,7 +66,7 @@ function StudentDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-slideUp">
         <StatCard
           label="Today's Meals"
-          value="3"
+          value={menu ? Object.values(menu.today).filter(slot => slot.items.length > 0).reduce((sum, slot) => sum + slot.items.length, 0) : '0'}
           icon={UtensilsCrossed}
           color="primary"
         />
@@ -74,13 +74,13 @@ function StudentDashboard() {
           label="Avg Rating"
           value={summary?.avgRating.toFixed(1) || '0'}
           icon={TrendingUp}
-          color="secondary"
+          color="primary"
         />
         <StatCard
           label="Your Feedback"
-          value="—"
+          value={summary?.totalFeedback || '0'}
           icon={MessageSquare}
-          color="accent"
+          color="primary"
         />
         <StatCard
           label="Best Meal"

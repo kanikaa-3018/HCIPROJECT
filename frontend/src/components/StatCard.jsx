@@ -4,8 +4,8 @@ import clsx from 'clsx'
 function StatCard({ label, value, icon: Icon, color = 'primary', trend = null }) {
   const colorClasses = {
     primary: 'bg-primary-100 dark:bg-primary-600/20 text-primary-700 dark:text-primary-400 border border-primary-300 dark:border-primary-700',
-    secondary: 'bg-secondary-100 dark:bg-secondary-600/20 text-secondary-700 dark:text-secondary-400 border border-secondary-300 dark:border-secondary-700',
-    accent: 'bg-accent-100 dark:bg-accent-600/20 text-accent-700 dark:text-accent-400 border border-accent-300 dark:border-accent-700',
+    secondary: 'bg-primary-100 dark:bg-primary-600/20 text-primary-700 dark:text-primary-400 border border-primary-300 dark:border-primary-700',
+    accent: 'bg-primary-100 dark:bg-primary-600/20 text-primary-700 dark:text-primary-400 border border-primary-300 dark:border-primary-700',
   }
 
   return (

@@ -232,6 +232,28 @@ export const analyticsAPI = {
     } catch (error) {
       throw error.response?.data || error
     }
+  },
+
+  getAllFeedback: async (status = 'all', mealName = '', page = 1, limit = 10) => {
+    try {
+      const response = await api.get('/admin/feedback', {
+        params: { status, mealName, page, limit }
+      })
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error
+    }
+  },
+
+  updateFeedbackStatus: async (feedbackId, newStatus) => {
+    try {
+      const response = await api.patch(`/admin/feedback/${feedbackId}/status`, {
+        status: newStatus
+      })
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error
+    }
   }
 }
 

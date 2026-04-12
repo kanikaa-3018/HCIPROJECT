@@ -13,7 +13,7 @@ function AdminDashboard() {
   const [analytics, setAnalytics] = useState(null)
   const { addToast } = useToastStore()
 
-  const COLORS = ['#3ebab3', '#e68870', '#f1b950', '#69ccbb', '#84dcc1', '#8b5cf6']
+  const COLORS = ['#5a8e7f', '#305145']
   const chartBg = '#111827'
   const chartText = '#e5e7eb'
   const gridColor = '#374151'

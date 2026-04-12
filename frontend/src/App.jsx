@@ -8,6 +8,7 @@ import RatingsPage from './pages/RatingsPage'
 import FeedbackPage from './pages/FeedbackPage'
 import AdminDashboard from './pages/AdminDashboard'
 import ReportsPage from './pages/ReportsPage'
+import AdminFeedback from './pages/AdminFeedback'
 import MainLayout from './layouts/MainLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 import Toast from './components/Toast'
@@ -84,6 +85,14 @@ function App() {
             element={
               <ProtectedRoute roles={['admin']} layout={MainLayout}>
                 <ReportsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/feedback" 
+            element={
+              <ProtectedRoute roles={['admin']} layout={MainLayout}>
+                <AdminFeedback />
               </ProtectedRoute>
             } 
           />

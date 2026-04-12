@@ -1,4 +1,5 @@
 import Feedback from '../models/Feedback.js'
+import Rating from '../models/Rating.js'
 
 export const submitFeedback = async (req, res) => {
   try {
@@ -135,13 +136,36 @@ export const updateFeedbackStatus = async (req, res) => {
 
 export const getFeedbackSummary = async (req, res) => {
   try {
+    // Count feedback
     const totalFeedback = await Feedback.countDocuments()
     const pendingFeedback = await Feedback.countDocuments({ status: 'pending' })
-    
+
+    // Calculate average rating from Rating collection
+    const ratings = await Rating.find()
+    const avgRating = ratings.length > 0 
+      ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length 
+      : 0
+
+    // Get best meal (most highly rated)
+    const bestMealData = await Rating.aggregate([
+      {
+        $group: {
+          _id: '$mealName',
+          avgRating: { $avg: '$rating' },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { avgRating: -1 } },
+      { $limit: 1 }
+    ])
+
+    const bestMeal = bestMealData.length > 0 ? bestMealData[0]._id : '—'
+
     res.json({
       totalFeedback,
       pendingFeedback,
-      avgRating: 4.5
+      avgRating: parseFloat(avgRating.toFixed(2)),
+      bestMeal
     })
   } catch (error) {
     res.status(500).json({ message: error.message })

@@ -236,3 +236,111 @@ export const getTopMeals = async (req, res) => {
     res.status(500).json({ message: error.message })
   }
 }
+
+export const getAllFeedback = async (req, res) => {
+  try {
+    const { status, mealName, page = 1, limit = 10 } = req.query
+    const pageNum = parseInt(page)
+    const limitNum = parseInt(limit)
+    const skip = (pageNum - 1) * limitNum
+
+    // Build filter
+    const filter = {}
+    if (status && status !== 'all') {
+      filter.status = status
+    }
+    if (mealName) {
+      filter.mealName = mealName
+    }
+
+    // Get total count
+    const totalFeedback = await Feedback.countDocuments(filter)
+
+    // Get feedback with pagination
+    const feedback = await Feedback.find(filter)
+      .populate('userId', 'name email rollNumber')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
+
+    // Group feedback by meal
+    const feedbackByMeal = {}
+    feedback.forEach(fb => {
+      if (!feedbackByMeal[fb.mealName]) {
+        feedbackByMeal[fb.mealName] = []
+      }
+      feedbackByMeal[fb.mealName].push({
+        id: fb._id,
+        user: fb.userId?.name || 'Anonymous',
+        email: fb.userId?.email,
+        issue: fb.issueType,
+        comment: fb.comment,
+        rating: fb.rating,
+        status: fb.status,
+        isAnonymous: fb.isAnonymous,
+        date: fb.createdAt,
+        day: new Date(fb.createdAt).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
+      })
+    })
+
+    // Get status statistics
+    const stats = await Feedback.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ])
+
+    // Get meal count
+    const mealStats = await Feedback.aggregate([
+      { $group: { _id: '$mealName', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ])
+
+    res.json({
+      feedback: feedbackByMeal,
+      pagination: {
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalFeedback / limitNum),
+        totalFeedback,
+        limit: limitNum
+      },
+      stats: {
+        byStatus: stats.reduce((acc, s) => {
+          acc[s._id] = s.count
+          return acc
+        }, {}),
+        byMeal: mealStats
+      }
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const updateFeedbackStatus = async (req, res) => {
+  try {
+    const { feedbackId } = req.params
+    const { status } = req.body
+
+    // Validate status
+    const validStatuses = ['pending', 'reviewed', 'resolved']
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' })
+    }
+
+    const feedback = await Feedback.findByIdAndUpdate(
+      feedbackId,
+      { status },
+      { new: true }
+    ).populate('userId', 'name email')
+
+    if (!feedback) {
+      return res.status(404).json({ message: 'Feedback not found' })
+    }
+
+    res.json({
+      message: 'Feedback status updated successfully',
+      feedback
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}

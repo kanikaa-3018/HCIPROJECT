@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { useToastStore } from '../store/toastStore'
 import { useThemeStore } from '../store/themeStore'
-import { Menu, X, LogOut, UtensilsCrossed, BarChart3, FileText, Home, Calendar, Moon, Sun, Star } from 'lucide-react'
+import { Menu, X, LogOut, UtensilsCrossed, BarChart3, FileText, Home, Calendar, Moon, Sun, Star, MessageSquare } from 'lucide-react'
 import clsx from 'clsx'
 
 function Sidebar() {
@@ -20,6 +20,7 @@ function Sidebar() {
     ? [
         { label: 'Dashboard', icon: BarChart3, path: '/admin' },
         { label: 'Reports', icon: FileText, path: '/reports' },
+        { label: 'Feedback', icon: MessageSquare, path: '/admin/feedback' },
       ]
     : [
         { label: 'Dashboard', icon: Home, path: '/dashboard' },
