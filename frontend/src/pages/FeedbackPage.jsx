@@ -38,6 +38,13 @@ function FeedbackPage() {
     fetchCommunityFeedback(currentPage)
   }, [currentPage])
 
+  // Debug meal availability
+  useEffect(() => {
+    console.log('📋 Menu updated:', menu)
+    console.log('🍽️ All meals available:', allMeals)
+    console.log('📝 Meal options for dropdown:', mealOptions)
+  }, [menu, allMeals, mealOptions])
+
   const fetchData = async () => {
     try {
       setLoading(true)
@@ -45,15 +52,23 @@ function FeedbackPage() {
         menuAPI.getDailyMenu(),
         feedbackAPI.getUserFeedback(),
       ])
-      setMenu({
-        breakfast: menuData.today.breakfast,
-        lunch: menuData.today.lunch,
-        hiTea: menuData.today.hiTea,
-        dinner: menuData.today.dinner,
-      })
+      
+      console.log('Menu data received:', menuData)
+      
+      // Properly structure menu data
+      const menuStructure = {
+        breakfast: menuData.today.breakfast || { items: [] },
+        lunch: menuData.today.lunch || { items: [] },
+        hiTea: menuData.today.hiTea || { items: [] },
+        dinner: menuData.today.dinner || { items: [] },
+      }
+      
+      console.log('Menu structure:', menuStructure)
+      setMenu(menuStructure)
       setUserFeedback(userFeedbackData)
       await fetchCommunityFeedback(1)
     } catch (error) {
+      console.error('Data fetch error:', error)
       addToast('Failed to load data', 'error')
     } finally {
       setLoading(false)
@@ -72,19 +87,27 @@ function FeedbackPage() {
     }
   }
 
-  const allMeals = menu && [
-    ...menu.breakfast.items,
-    ...menu.lunch.items,
-    ...(menu.hiTea?.items || []),
-    ...menu.dinner.items,
-  ]
+  // Build meals array safely
+  const allMeals = menu 
+    ? [
+        ...(menu.breakfast?.items || []),
+        ...(menu.lunch?.items || []),
+        ...(menu.hiTea?.items || []),
+        ...(menu.dinner?.items || []),
+      ]
+    : []
 
-  const mealOptions = allMeals
+  console.log('All meals available:', allMeals)
+
+  const mealOptions = allMeals.length > 0
     ? [
         { value: '', label: 'Select a meal...' },
-        ...allMeals.map((meal) => ({ value: meal.id, label: meal.name })),
+        ...allMeals.map((meal) => ({
+          value: meal.id || meal._id || meal.name, // Use id, _id, or name as fallback
+          label: meal.name
+        })),
       ]
-    : [{ value: '', label: 'Loading meals...' }]
+    : [{ value: '', label: menu ? 'No meals available' : 'Loading meals...' }]
 
   const issueOptions = [
     { value: 'taste', label: 'Taste' },
@@ -102,19 +125,36 @@ function FeedbackPage() {
   }
 
   const handleMealChange = (e) => {
-    const mealId = e.target.value
-    console.log('Meal selected, ID:', mealId)
-    console.log('All meals:', allMeals)
-    const selected = allMeals?.find((m) => {
-      console.log(`Comparing: ${m.id} (type: ${typeof m.id}) === ${mealId} (type: ${typeof mealId})`)
-      return m.id === mealId
+    const selectedValue = e.target.value
+    console.log('🔍 Meal dropdown changed:', selectedValue)
+    
+    if (!selectedValue) {
+      console.log('No meal selected')
+      setFormData({
+        ...formData,
+        mealId: '',
+        meal: '',
+      })
+      return
+    }
+
+    const selected = allMeals.find((m) => {
+      const mealId = m.id || m._id || m.name
+      return mealId === selectedValue
     })
-    console.log('Selected meal:', selected)
-    setFormData({
-      ...formData,
-      mealId: mealId || '',
-      meal: selected?.name || '',
-    })
+
+    console.log('✅ Selected meal:', selected)
+    
+    if (selected) {
+      setFormData({
+        ...formData,
+        mealId: selectedValue,
+        meal: selected.name,
+      })
+      console.log('✅ Form updated with meal:', selected.name)
+    } else {
+      console.warn('❌ Meal not found in allMeals')
+    }
   }
 
   const handleSubmit = async (e) => {
