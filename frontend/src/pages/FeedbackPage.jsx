@@ -103,10 +103,16 @@ function FeedbackPage() {
 
   const handleMealChange = (e) => {
     const mealId = e.target.value
-    const selected = allMeals?.find((m) => m.id === parseInt(mealId))
+    console.log('Meal selected, ID:', mealId)
+    console.log('All meals:', allMeals)
+    const selected = allMeals?.find((m) => {
+      console.log(`Comparing: ${m.id} (type: ${typeof m.id}) === ${mealId} (type: ${typeof mealId})`)
+      return m.id === mealId
+    })
+    console.log('Selected meal:', selected)
     setFormData({
       ...formData,
-      mealId: parseInt(mealId) || '',
+      mealId: mealId || '',
       meal: selected?.name || '',
     })
   }
@@ -114,18 +120,35 @@ function FeedbackPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!formData.mealId || !formData.description.trim()) {
-      addToast('Please select a meal and provide feedback', 'error')
+    // Debug logging
+    console.log('Form Data:', formData)
+    console.log('All Meals:', allMeals)
+
+    if (!formData.mealId || formData.mealId === '') {
+      addToast('Please select a meal', 'error')
       return
     }
 
-    if (formData.description.length < 10) {
-      addToast('Feedback should be at least 10 characters', 'error')
+    if (!formData.meal || formData.meal === '') {
+      addToast('Meal not found - please select again', 'error')
+      return
+    }
+
+    if (!formData.description.trim() || formData.description.trim().length < 10) {
+      addToast('Feedback must be at least 10 characters', 'error')
       return
     }
 
     setLoading(true)
     try {
+      console.log('Submitting feedback with:', {
+        mealName: formData.meal,
+        issueType: formData.issue,
+        comment: formData.description,
+        isAnonymous: formData.anonymous,
+        rating: formData.rating
+      })
+
       await feedbackAPI.submitFeedback(
         formData.meal,
         formData.issue,
@@ -147,7 +170,7 @@ function FeedbackPage() {
       fetchData()
     } catch (error) {
       console.error('Feedback error:', error)
-      addToast('Failed to submit feedback', 'error')
+      addToast(error.message || 'Failed to submit feedback', 'error')
     } finally {
       setLoading(false)
     }
