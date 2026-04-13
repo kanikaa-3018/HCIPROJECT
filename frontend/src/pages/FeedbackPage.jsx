@@ -12,13 +12,14 @@ import { useToastStore } from '../store/toastStore'
 
 function FeedbackPage() {
   const [loading, setLoading] = useState(false)
-  const [menu, setMenu] = useState(null)
+  const [weeklyMenu, setWeeklyMenu] = useState([])
   const [communityFeedback, setCommunityFeedback] = useState([])
   const [userFeedback, setUserFeedback] = useState([])
   const [filterResolution, setFilterResolution] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [paginationData, setPaginationData] = useState(null)
+  const [selectedDay, setSelectedDay] = useState('')
   const [formData, setFormData] = useState({
     mealId: '',
     meal: '',
@@ -41,23 +42,13 @@ function FeedbackPage() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const [menuData, userFeedbackData] = await Promise.all([
-        menuAPI.getDailyMenu(),
+      const [weeklyMenuData, userFeedbackData] = await Promise.all([
+        menuAPI.getWeeklyMenu(),
         feedbackAPI.getUserFeedback(),
       ])
       
-      console.log('Menu data received:', menuData)
-      
-      // Properly structure menu data
-      const menuStructure = {
-        breakfast: menuData.today.breakfast || { items: [] },
-        lunch: menuData.today.lunch || { items: [] },
-        hiTea: menuData.today.hiTea || { items: [] },
-        dinner: menuData.today.dinner || { items: [] },
-      }
-      
-      console.log('Menu structure:', menuStructure)
-      setMenu(menuStructure)
+      console.log('Weekly menu data received:', weeklyMenuData)
+      setWeeklyMenu(weeklyMenuData)
       setUserFeedback(userFeedbackData)
       await fetchCommunityFeedback(1)
     } catch (error) {
@@ -80,27 +71,47 @@ function FeedbackPage() {
     }
   }
 
-  // Build meals array safely
-  const allMeals = menu 
+  // Build day options
+  const dayOptions = [
+    { value: '', label: 'Select a day...' },
+    ...weeklyMenu.map((day, index) => ({
+      value: index.toString(),
+      label: day.day
+    }))
+  ]
+
+  // Get selected day's meals
+  const selectedDayMenu = selectedDay !== '' ? weeklyMenu[parseInt(selectedDay)] : null
+  
+  const allMeals = selectedDayMenu 
     ? [
-        ...(menu.breakfast?.items || []),
-        ...(menu.lunch?.items || []),
-        ...(menu.hiTea?.items || []),
-        ...(menu.dinner?.items || []),
+        ...getMealsFromText(selectedDayMenu.breakfast),
+        ...getMealsFromText(selectedDayMenu.lunch),
+        ...getMealsFromText(selectedDayMenu.hiTea),
+        ...getMealsFromText(selectedDayMenu.dinner),
       ]
     : []
 
-  console.log('All meals available:', allMeals)
+  // Helper function to parse meal text into array
+  function getMealsFromText(mealText) {
+    if (!mealText || typeof mealText !== 'string') return []
+    
+    // Split by comma and trim whitespace
+    return mealText.split(',').map(meal => ({
+      name: meal.trim(),
+      id: meal.trim()
+    })).filter(meal => meal.name.length > 0)
+  }
 
   const mealOptions = allMeals.length > 0
     ? [
         { value: '', label: 'Select a meal...' },
         ...allMeals.map((meal) => ({
-          value: meal.id || meal._id || meal.name, // Use id, _id, or name as fallback
+          value: meal.name,
           label: meal.name
         })),
       ]
-    : [{ value: '', label: menu ? 'No meals available' : 'Loading meals...' }]
+    : [{ value: '', label: selectedDay ? 'No meals available' : 'Select a day first...' }]
 
   const issueOptions = [
     { value: 'taste', label: 'Taste' },
@@ -114,6 +125,17 @@ function FeedbackPage() {
     setFormData({
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
+    })
+  }
+
+  const handleDayChange = (e) => {
+    const dayIndex = e.target.value
+    setSelectedDay(dayIndex)
+    // Reset meal selection when day changes
+    setFormData({
+      ...formData,
+      mealId: '',
+      meal: '',
     })
   }
 
@@ -131,23 +153,12 @@ function FeedbackPage() {
       return
     }
 
-    const selected = allMeals.find((m) => {
-      const mealId = m.id || m._id || m.name
-      return mealId === selectedValue
+    setFormData({
+      ...formData,
+      mealId: selectedValue,
+      meal: selectedValue,
     })
-
-    console.log('✅ Selected meal:', selected)
-    
-    if (selected) {
-      setFormData({
-        ...formData,
-        mealId: selectedValue,
-        meal: selected.name,
-      })
-      console.log('✅ Form updated with meal:', selected.name)
-    } else {
-      console.warn('❌ Meal not found in allMeals')
-    }
+    console.log('✅ Form updated with meal:', selectedValue)
   }
 
   const handleSubmit = async (e) => {
@@ -191,6 +202,7 @@ function FeedbackPage() {
       )
       addToast('Thank you! Your feedback helps us improve.', 'success')
       setSubmitted(true)
+      setSelectedDay('')
       setFormData({
         mealId: '',
         meal: '',
@@ -271,6 +283,15 @@ function FeedbackPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Day Selection */}
+              <Select
+                label="Select Day (Required)"
+                name="day"
+                value={selectedDay}
+                onChange={handleDayChange}
+                options={dayOptions}
+              />
+
               {/* Meal Selection */}
               <Select
                 label="Meal Feedback (Required)"
@@ -278,6 +299,7 @@ function FeedbackPage() {
                 value={formData.mealId}
                 onChange={handleMealChange}
                 options={mealOptions}
+                disabled={!selectedDay}
               />
 
               {/* Issue Type */}
