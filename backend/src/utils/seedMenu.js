@@ -17,8 +17,11 @@ const seedMenu = async () => {
     const today = new Date()
     const currentDay = today.getDay()
     const diff = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1)
-    const monday = new Date(today.setDate(diff))
+    const monday = new Date()
+    monday.setDate(diff)
     monday.setHours(0, 0, 0, 0)
+    
+    console.log('Monday date:', monday.toISOString())
 
     // Menu data for the week
     const weeklyMenuData = [

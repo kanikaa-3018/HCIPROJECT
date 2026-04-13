@@ -61,7 +61,8 @@ export const getWeeklyMenu = async (req, res) => {
     // Calculate Monday of current week
     const currentDay = today.getDay()
     const diff = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1)
-    const monday = new Date(today.setDate(diff))
+    const monday = new Date()
+    monday.setDate(diff)
     monday.setHours(0, 0, 0, 0)
     
     // Calculate Sunday (end of week)

@@ -47,7 +47,7 @@ function FeedbackPage() {
         feedbackAPI.getUserFeedback(),
       ])
       
-      console.log('Weekly menu data received:', weeklyMenuData)
+      console.log('🔍 Weekly menu data received:', JSON.stringify(weeklyMenuData, null, 2))
       setWeeklyMenu(weeklyMenuData)
       setUserFeedback(userFeedbackData)
       await fetchCommunityFeedback(1)
