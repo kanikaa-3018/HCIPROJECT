@@ -58,11 +58,18 @@ export const getWeeklyMenu = async (req, res) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     
-    const weekEnd = new Date(today)
-    weekEnd.setDate(weekEnd.getDate() + 7)
+    // Calculate Monday of current week
+    const currentDay = today.getDay()
+    const diff = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1)
+    const monday = new Date(today.setDate(diff))
+    monday.setHours(0, 0, 0, 0)
+    
+    // Calculate Sunday (end of week)
+    const sunday = new Date(monday)
+    sunday.setDate(sunday.getDate() + 7)
 
     const menus = await Menu.find({
-      date: { $gte: today, $lt: weekEnd }
+      date: { $gte: monday, $lt: sunday }
     }).sort({ date: 1 })
 
     if (menus.length === 0) {

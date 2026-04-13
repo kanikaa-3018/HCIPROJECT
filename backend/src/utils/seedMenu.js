@@ -178,6 +178,7 @@ const seedMenu = async () => {
     const menus = weeklyMenuData.map((dayData, index) => {
       const date = new Date(monday)
       date.setDate(date.getDate() + index)
+      date.setHours(0, 0, 0, 0)
       
       return {
         date,
