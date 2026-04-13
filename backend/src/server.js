@@ -121,9 +121,6 @@ const seedMenuData = async () => {
         meals: [
           { name: 'Sandwich', type: 'veg', timeSlot: 'breakfast' },
           { name: 'Upma', type: 'veg', timeSlot: 'breakfast' },
-          { name: 'Rajma', type: 'veg', timeSlot: 'lunch' },
-          { name: 'Salad', type: 'veg', timeSlot: 'lunch' },
-          { name: 'Rice', type: 'veg', timeSlot: 'lunch' },
           { name: 'Roti', type: 'veg', timeSlot: 'lunch' },
           { name: 'Aloo Sabji', type: 'veg', timeSlot: 'lunch' },
           { name: 'Kaddu Sabji', type: 'veg', timeSlot: 'lunch' },
@@ -131,11 +128,8 @@ const seedMenuData = async () => {
           { name: 'Veg Raita', type: 'veg', timeSlot: 'lunch' },
           { name: 'Maggi', type: 'veg', timeSlot: 'hiTea' },
           { name: 'Toast', type: 'veg', timeSlot: 'hiTea' },
-          { name: 'Rajma', type: 'veg', timeSlot: 'dinner' },
-          { name: 'Salad', type: 'veg', timeSlot: 'dinner' },
-          { name: 'Rice', type: 'veg', timeSlot: 'dinner' },
-          { name: 'Achar', type: 'veg', timeSlot: 'dinner' },
           { name: 'Matar Paneer', type: 'veg', timeSlot: 'dinner' },
+          { name: 'Rice', type: 'veg', timeSlot: 'dinner' },
           { name: 'Toor Dal', type: 'veg', timeSlot: 'dinner' }
         ]
       },
