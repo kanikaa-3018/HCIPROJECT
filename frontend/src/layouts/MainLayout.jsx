@@ -15,9 +15,9 @@ function MainLayout({ children }) {
   }, [theme])
   
   return (
-    <div className="flex min-h-screen bg-light-50 dark:bg-dark-800 transition-colors duration-300">
+    <div className="flex min-h-screen md:h-screen md:overflow-hidden bg-light-50 dark:bg-dark-800 transition-colors duration-300">
       <Sidebar />
-      <main className="flex-1 p-4 md:p-8 overflow-auto bg-gradient-to-br from-light-50 via-light-100 to-light-200 dark:from-dark-800 dark:via-dark-700 dark:to-dark-800 transition-all duration-300">
+      <main className="min-w-0 flex-1 p-4 md:h-screen md:p-8 overflow-y-auto bg-gradient-to-br from-light-50 via-light-100 to-light-200 dark:from-dark-800 dark:via-dark-700 dark:to-dark-800 transition-all duration-300">
         {children}
       </main>
     </div>

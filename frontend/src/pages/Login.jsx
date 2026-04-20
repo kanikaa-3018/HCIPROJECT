@@ -102,7 +102,6 @@ function Login({ onSwitchToSignup }) {
               </p>
               <div className="text-sm space-y-1 text-primary-800 dark:text-primary-400">
                 <p><span className="font-semibold">Student:</span> student@college.edu</p>
-                <p><span className="font-semibold">Admin:</span> admin@college.edu</p>
                 <p><span className="font-semibold">Password:</span> password</p>
               </div>
             </div>

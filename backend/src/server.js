@@ -54,27 +54,87 @@ mongoose.connect(process.env.MONGODB_URI)
 // Seed demo users
 const seedDemoUsers = async () => {
   try {
-    const existingUser = await User.findOne({ email: 'student@college.edu' })
-    if (!existingUser) {
-      const demoUsers = [
-        {
-          name: 'Student Demo',
-          email: 'student@college.edu',
-          password: 'password',
-          rollNumber: 'BT001',
-          role: 'btech'
-        },
-        {
-          name: 'Admin Demo',
-          email: 'admin@college.edu',
-          password: 'password',
-          rollNumber: 'ADM001',
-          role: 'admin'
+    const demoUsers = [
+      {
+        name: 'Student Demo',
+        email: 'student@college.edu',
+        password: 'password',
+        rollNumber: 'BT001',
+        role: 'btech'
+      }
+    ]
+
+    const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase()
+    const adminPassword = process.env.ADMIN_PASSWORD
+    if (adminEmail && adminPassword) {
+      demoUsers.push({
+        name: process.env.ADMIN_NAME || 'Mess Admin',
+        email: adminEmail,
+        password: adminPassword,
+        role: 'admin'
+      })
+    }
+
+    for (const demoUser of demoUsers) {
+      const existingUser = await User.findOne({ email: demoUser.email })
+
+      if (!existingUser) {
+        await User.create(demoUser)
+        console.log(`Demo user created: ${demoUser.email}`)
+        continue
+      }
+
+      if (demoUser.role === 'admin') {
+        let shouldSaveAdmin = false
+
+        if (existingUser.role !== 'admin') {
+          existingUser.role = 'admin'
+          shouldSaveAdmin = true
         }
-      ]
-      
-      await User.insertMany(demoUsers)
-      console.log('✅ Demo users created')
+
+        if (demoUser.name && existingUser.name !== demoUser.name) {
+          existingUser.name = demoUser.name
+          shouldSaveAdmin = true
+        }
+
+        if (existingUser.rollNumber) {
+          existingUser.rollNumber = undefined
+          shouldSaveAdmin = true
+        }
+
+        const adminPasswordMatches = await existingUser.comparePassword(demoUser.password)
+        if (!adminPasswordMatches) {
+          existingUser.password = demoUser.password
+          shouldSaveAdmin = true
+        }
+
+        if (shouldSaveAdmin) {
+          await existingUser.save()
+          console.log(`Admin account synced: ${demoUser.email}`)
+        }
+
+        continue
+      }
+
+      const hasHashedPassword = existingUser.password?.startsWith('$2a$') ||
+        existingUser.password?.startsWith('$2b$') ||
+        existingUser.password?.startsWith('$2y$')
+
+      if (!hasHashedPassword && existingUser.password === demoUser.password) {
+        existingUser.password = demoUser.password
+        await existingUser.save()
+        console.log(`Demo user password repaired: ${demoUser.email}`)
+      }
+
+    }
+
+    const adminRollCleanup = await User.updateMany(
+      { role: 'admin', rollNumber: { $exists: true } },
+      { $unset: { rollNumber: '' } }
+    )
+
+    if (adminRollCleanup.modifiedCount > 0) {
+      console.log(`Admin roll numbers removed: ${adminRollCleanup.modifiedCount}`)
     }
   } catch (error) {
     console.log('⚠️ Seeding error:', error.message)

@@ -48,7 +48,6 @@ function Signup({ onSwitchToLogin }) {
   const roles = [
     { value: 'btech', label: 'B.Tech Student' },
     { value: 'mtech', label: 'M.Tech/PhD Student' },
-    { value: 'admin', label: 'Admin (Warden)' },
   ]
 
   return (
