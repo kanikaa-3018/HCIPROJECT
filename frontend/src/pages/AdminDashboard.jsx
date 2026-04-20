@@ -128,7 +128,7 @@ ${analytics.dailyRatings?.map(d => `${d.day}: ${d.avg?.toFixed(2)}/5`).join('\n'
   const handleViewAllFeedback = () => {
     addToast('Navigate to Feedback page to view all feedback', 'info')
     // In a real app, you might navigate using React Router
-    window.location.href = '/feedback'
+    window.location.href = '/admin/feedback'
   }
   if (loading) {
     return <SkeletonLoader count={5} height="h-64" />

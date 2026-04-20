@@ -18,8 +18,13 @@ const userSchema = new mongoose.Schema({
   },
   rollNumber: {
     type: String,
-    required: true,
-    unique: true
+    required: function() {
+      return this.role !== 'admin'
+    },
+    unique: true,
+    sparse: true,
+    trim: true,
+    uppercase: true
   },
   role: {
     type: String,

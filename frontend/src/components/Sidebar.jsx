@@ -51,7 +51,7 @@ function Sidebar() {
       {/* Sidebar */}
       <aside
         className={clsx(
-          'fixed md:relative top-0 left-0 h-screen w-72 bg-gradient-to-b from-light-100 to-light-200 dark:from-dark-700 dark:to-dark-800 text-dark-900 dark:text-dark-100 z-30 transform transition-all duration-300 flex flex-col border-r border-light-200 dark:border-dark-600 shadow-soft dark:shadow-none',
+          'fixed md:sticky top-0 left-0 h-screen w-72 shrink-0 overflow-y-auto bg-gradient-to-b from-light-100 to-light-200 dark:from-dark-700 dark:to-dark-800 text-dark-900 dark:text-dark-100 z-30 transform transition-all duration-300 flex flex-col border-r border-light-200 dark:border-dark-600 shadow-soft dark:shadow-none',
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         )}
       >
@@ -66,7 +66,9 @@ function Sidebar() {
             </h1>
           </div>
           <p className="text-sm font-semibold text-dark-700 dark:text-dark-300">{user?.name || 'User'}</p>
-          <p className="text-xs text-dark-600 dark:text-dark-400 capitalize mt-1">{user?.role} Student</p>
+          <p className="text-xs text-dark-600 dark:text-dark-400 capitalize mt-1">
+            {isAdmin ? 'Admin' : `${user?.role} Student`}
+          </p>
         </div>
 
         {/* Menu Items */}
